@@ -1,0 +1,830 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>과학 윤리 키보드 토론</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* 교사 화면은 프로젝터용 넓은 격자, 학생 화면은 폰 한 손 채팅 */
+:root{
+  --paper:#F1F4F3; --card:#FFFFFF; --ink:#15211E; --muted:#5B6A65; --line:#D2DBD7;
+  --civic:#0E6656; --civic-soft:#DDEDE8; --warn:#9A5B00; --warn-soft:#FFF4D6;
+  --pro:#1F5FA6; --pro-soft:#E3EDF8; --con:#B3263E; --con-soft:#F8E4E8; --none:#7A8682; --none-soft:#ECEFEE;
+  --display:"Black Han Sans","IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px}
+h1,h2,h3{margin:0;text-wrap:balance}
+h2{font-size:1.15rem}
+.display{font-family:var(--display);font-weight:400;letter-spacing:.01em}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--civic);outline-offset:2px}
+.btn{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:.55em 1em;cursor:pointer;font-weight:500;white-space:nowrap}
+.btn:hover:not(:disabled){border-color:var(--civic)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.primary{background:var(--civic);border-color:var(--civic);color:#fff}
+.btn.big{font-size:1.15rem;padding:.7em 1.6em}
+.btn.danger{background:var(--con);border-color:var(--con);color:#fff}
+.btn.on{background:var(--ink);border-color:var(--ink);color:#fff}
+input,select,textarea{border:1px solid var(--line);border-radius:10px;padding:.6em .75em;background:var(--card);width:100%}
+textarea{resize:vertical}
+label{font-weight:500}
+.eyebrow{margin:0;color:var(--muted);font-size:.85em;letter-spacing:.04em}
+.lead{color:var(--muted);max-width:60ch}
+.empty{color:var(--muted);margin:0}
+.status{margin:0;color:var(--muted);font-size:.92em}
+.badge{display:inline-block;font-size:.78em;font-weight:700;padding:.05em .55em;border-radius:999px;margin-right:.35em;background:var(--none-soft);color:var(--none);white-space:nowrap}
+.badge.pro{background:var(--pro-soft);color:var(--pro)}
+.badge.con{background:var(--con-soft);color:var(--con)}
+.pill{display:inline-flex;gap:.3em;align-items:center;border:1px solid var(--line);border-radius:999px;padding:.15em .8em;background:var(--card);font-size:.9em;white-space:nowrap}
+.banner{background:var(--warn-soft);border:1px solid #E7C66B;color:#5B4300;border-radius:10px;padding:.5em .9em;margin:0 0 12px;font-size:.9em}
+.banner.bad{background:var(--con-soft);border-color:var(--con);color:var(--con)}
+.box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;gap:10px;align-content:start;min-width:0}
+/* 항목 사이는 넓게, 라벨과 입력창 사이는 좁게 */
+.box > h2,.box > .row:has(> h2){margin-bottom:4px}
+.box > label:not(:first-of-type),form > label:not(:first-of-type){margin-top:10px}
+.box > .row:not(:first-child){margin-top:4px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.row select{width:auto}
+.timer{font-family:var(--display);font-variant-numeric:tabular-nums;font-size:1.3rem;padding:.05em .6em;border-radius:10px;background:var(--civic-soft);color:var(--civic)}
+.timer.big{font-size:2.4rem}
+.timer.soon{background:var(--warn-soft);color:var(--warn)}
+.timer.over{background:var(--con-soft);color:var(--con)}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:#fff;padding:.6em 1.1em;border-radius:10px;z-index:30;max-width:calc(100% - 32px)}
+
+/* 공지 팝업 */
+.modal{position:fixed;inset:0;background:rgba(21,33,30,.55);display:grid;place-items:center;z-index:20;
+  padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.modal-card{background:var(--card);border-radius:16px;padding:22px;max-width:440px;width:100%;display:grid;gap:14px;box-shadow:0 12px 40px rgba(0,0,0,.25)}
+.modal-text{margin:0;font-size:1.35rem;font-weight:700;line-height:1.4;white-space:pre-wrap}
+
+/* 첫 화면 */
+.landing{max-width:760px;margin:6vh auto 0;display:grid;gap:18px}
+.landing h1{font-size:clamp(2.2rem,7vw,3.6rem);line-height:1.1}
+.landing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+
+/* 학생 */
+.student{max-width:620px;margin:0 auto;display:grid;gap:14px}
+.alias{font-family:var(--display);font-size:1.9rem;line-height:1.2;color:var(--civic);margin:0}
+.stance-pick{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stance-pick button{padding:.9em .5em;border-radius:12px;border:2px solid var(--line);background:var(--card);cursor:pointer;display:grid;gap:2px}
+.stance-pick b{font-size:1.15rem}
+.stance-pick span{font-size:.82em;color:var(--muted)}
+.stance-pick .pro[aria-pressed="true"]{border-color:var(--pro);background:var(--pro-soft);color:var(--pro)}
+.stance-pick .con[aria-pressed="true"]{border-color:var(--con);background:var(--con-soft);color:var(--con)}
+.stance-pick button:disabled{cursor:default}
+.motion{background:var(--civic-soft);border-radius:12px;padding:12px 14px}
+.motion summary{cursor:pointer;font-weight:700}
+.motion p,.motion ul{margin:.5em 0 0}
+.motion ul{padding-left:1.2em}
+.chat{display:flex;flex-direction:column;gap:10px;height:calc(100dvh - 32px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));min-height:480px}
+.room-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px;align-items:center}
+.room-head h1{font-family:var(--display);font-weight:400;font-size:1.5rem}
+.members{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:.88em}
+.notice{margin:0;background:var(--ink);color:#fff;border-radius:10px;padding:.5em .8em;font-weight:500}
+.msgs{flex:1;overflow-y:auto;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px;min-height:0}
+.msg{max-width:85%;align-self:flex-start;border-radius:12px;padding:.5em .75em;background:var(--none-soft);border-left:4px solid var(--none)}
+.msg.pro{background:var(--pro-soft);border-left-color:var(--pro)}
+.msg.con{background:var(--con-soft);border-left-color:var(--con)}
+.msg.mine{align-self:flex-end}
+.msg .who{font-size:.82em;color:var(--muted);display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.msg p{margin:.15em 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.msg .real{color:var(--ink);font-weight:700}
+.msg .del,.msg .rep{margin-left:auto;border:0;background:none;color:var(--con);cursor:pointer;font-size:.95em;padding:0 .2em}
+.msg .rep{color:var(--civic);font-weight:700}
+.quote{margin:.3em 0 .1em;padding:.25em .6em;border-left:3px solid var(--muted);background:rgba(255,255,255,.6);border-radius:6px;font-size:.85em;color:var(--muted);overflow-wrap:anywhere}
+.quote b{color:var(--ink)}
+.reply-bar{display:flex;gap:8px;align-items:center;justify-content:space-between;background:var(--civic-soft);border-radius:10px;padding:.35em .4em .35em .8em;font-size:.9em}
+.reply-bar span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.send{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}
+.wait{text-align:center;padding:24px 8px;color:var(--muted);margin:0}
+.final{background:var(--card);border:2px solid var(--civic);border-radius:14px;padding:12px 14px;display:grid;gap:8px}
+.box .final{border:0;padding:0}
+.final-q{margin:0;font-weight:700;font-size:1.1rem}
+
+/* 최종 입장 통계 */
+.stat-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.stat-tiles div{background:var(--paper);border-radius:12px;padding:10px 12px;display:grid}
+.stat-tiles b{font-family:var(--display);font-weight:400;font-size:1.8rem;font-variant-numeric:tabular-nums;line-height:1.2}
+.stat-tiles span{color:var(--muted);font-size:.9em}
+.sbar{display:grid;grid-template-columns:3.5em 1fr;gap:8px;align-items:center}
+.bar2{display:flex;height:30px;border-radius:8px;overflow:hidden;background:var(--none-soft)}
+.bar2 span{display:flex;align-items:center;justify-content:center;color:#fff;font-size:.85em;font-weight:700;white-space:nowrap;overflow:hidden}
+.bar2 .pro{background:var(--pro)}
+.bar2 .con{background:var(--con)}
+
+/* 교사 */
+.teacher{max-width:1440px;margin:0 auto;display:grid;gap:18px;font-size:17px}
+#t-main,#rooms,#preview{display:grid;gap:18px;align-content:start}
+#rooms:empty,#preview:empty{display:none}
+.t-head{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+.t-brand{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.t-brand .display{font-size:1.7rem}
+.tabs{display:flex;flex-wrap:wrap;gap:0;border-bottom:2px solid var(--line)}
+.tabs button{border:0;background:none;padding:.7em 1.2em;cursor:pointer;font-weight:700;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-2px;display:inline-flex;gap:.5em;align-items:center}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--civic)}
+.live{font-size:.72em;font-weight:700;background:var(--con);color:#fff;border-radius:999px;padding:.05em .55em}
+.live.idle{background:var(--civic)}
+.qrbox{display:flex;flex-wrap:wrap;gap:18px;align-items:center}
+.qrbox img{width:220px;height:220px;image-rendering:pixelated}
+.qrbox .url{font-size:1.1rem;word-break:break-all;margin:0}
+.qrbox .code{font-family:var(--display);font-size:3rem;color:var(--civic);line-height:1;margin:0}
+.counts{display:flex;flex-wrap:wrap;gap:8px}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:900px){.grid2{grid-template-columns:1fr}}
+.col{display:grid;gap:18px;align-content:start;min-width:0}
+.tablewrap{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:14px}
+/* 고정 칸 너비: 본명을 켜고 꺼도 칸이 움직이지 않게 */
+.roster{width:100%;min-width:480px;border-collapse:collapse;table-layout:fixed;font-variant-numeric:tabular-nums}
+.roster th,.roster td{text-align:left;padding:.5em .8em;border-bottom:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.roster th{font-size:.82em;color:var(--muted);font-weight:500}
+.masked{color:var(--muted);letter-spacing:.15em}
+.rooms{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.room{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:8px;align-content:start;min-width:0}
+.room h3{font-family:var(--display);font-weight:400;font-size:1.3rem;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.room h3 small{font-family:var(--body);font-size:.75rem;color:var(--muted)}
+.mlist{list-style:none;margin:0;padding:0;display:grid;gap:2px;font-size:.92em}
+.mlist li{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mlist .real{font-weight:700;margin-left:.4em}
+.room .msgs{height:340px;border:0;background:var(--paper);padding:8px}
+.room .msg{max-width:100%;font-size:.92em}
+.phase .btn{min-width:5.5em}
+</style>
+</head>
+<body>
+<p id="demo" class="banner" hidden>체험 모드예요. Firebase를 설정하기 전이라 이 컴퓨터의 브라우저 탭끼리만 연결돼요. 탭을 여러 개 열어 학생 역할을 해 볼 수 있어요.</p>
+<p id="offline" class="banner bad" hidden>연결이 끊겼어요. 와이파이를 확인해 주세요. 다시 연결되면 자동으로 이어져요.</p>
+<div id="app"><p class="empty">불러오는 중…</p></div>
+<div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-text" hidden>
+  <div class="modal-card"><p class="eyebrow">선생님 공지</p><p id="modal-text" class="modal-text"></p>
+    <button id="modal-ok" class="btn primary big">확인</button></div>
+</div>
+<div id="toast" role="status" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+// 선생님: Firebase 콘솔에서 복사한 웹 앱 설정값을 여기에 붙여 넣으세요. 비워 두면 체험 모드로 열려요.
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAS2w-AAJqhJwd07Td5NQ5pkB-TAQDfpQ0",
+  authDomain: "science-debate-96521.firebaseapp.com",
+  databaseURL: "https://science-debate-96521-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "science-debate-96521",
+  appId: "1:676724039027:web:159cd4698711c1599e3906"
+};
+
+// 교과서 132~135쪽 사례를 학생용 문장으로 다듬은 주제들
+const PRESETS = [
+  { name: '유전체 분석 기술 (교과서 탐구)', motion: '유전체 분석 기술을 적극적으로 이용해야 한다.',
+    background: '유전체 분석 기술은 생물의 유전정보를 분석해서 필요한 정보를 얻는 기술이에요. 비용이 낮아지고 인공지능과 결합하면서 질병을 미리 진단하거나 개인에게 맞는 항암 치료를 할 수 있게 되었어요.\n하지만 유전정보가 유출되면 인권 침해가 생길 수 있고, 회사나 보험사가 유전정보를 근거로 사람을 차별할 수 있다는 우려도 있어요.' },
+  { name: '유전자변형 농산물', motion: '유전자변형 농산물의 생산을 늘려야 한다.',
+    background: '유전자변형 농산물은 유전자를 바꿔 제초제나 해충에 강하게 만든 농산물이에요. 생산성이 높아 식량 부족 문제를 해결하는 데 도움이 될 수 있어요.\n하지만 제초제 사용이 늘어 환경이 오염될 수 있고, 먹었을 때 몸에 미치는 영향이 아직 충분히 검증되지 않았다는 의견도 있어요.' },
+  { name: '우주 개발', motion: '우주 개발을 확대해야 한다.',
+    background: '우주 개발로 달이나 소행성에서 새로운 자원을 얻거나, 사람이 살 수 있는 새로운 환경을 찾을 수 있어요.\n하지만 버려진 우주 비행체가 우주 쓰레기가 되어 인공위성과 부딪히거나 땅에 떨어질 수 있고, 발사할 때 대기 오염 물질이 나와요. 지구에도 아직 개발할 곳이 많다는 의견도 있어요.' },
+  { name: '신재생 에너지', motion: '신재생 에너지를 주력 에너지원으로 확대해야 한다.',
+    background: '태양광, 풍력 같은 신재생 에너지는 전기를 만들 때 이산화 탄소 같은 오염 물질이 거의 나오지 않아요.\n하지만 날씨에 따라 생산량이 달라져 전기를 안정적으로 공급하기 어렵고, 처음 설치하는 데 비용이 많이 든다는 문제가 있어요.' }
+];
+const RULES = ['근거를 들어 말해요.', '상대 의견을 인용해서 반박해요.', '과학 윤리 측면의 근거를 하나 이상 써요.', '사람이 아니라 의견을 비판해요. 비방하거나 본명을 밝히지 않아요.'];
+const PHASES = [
+  { label: '입론', text: '입론 시간이에요. 내 입장과 근거를 써 주세요.' },
+  { label: '토론', text: '토론 시간이에요. 상대 의견에 답장으로 반박하거나 질문해 주세요.' },
+  { label: '정리', text: '정리 시간이에요. 상대 의견 중 인정할 점과 나의 최종 입장을 써 주세요.' }
+];
+const DEFAULT_BANNED = ['시발', '씨발', 'ㅅㅂ', 'ㅆㅂ', '병신', 'ㅂㅅ', '개새끼', '새끼', '존나', 'ㅈㄴ', '지랄', '닥쳐', 'ㄷㅊ', '꺼져', 'ㄲㅈ', '미친놈', '미친년', '등신', '엿먹어', '염병'];
+const STANCE = { pro: '찬성', con: '반대' };
+const ADJ = ['용감한', '차분한', '날카로운', '성실한', '호기심 많은', '꼼꼼한', '유쾌한', '신중한', '당당한', '느긋한'];
+const NOUN = ['수달', '부엉이', '고래', '여우', '펭귄', '다람쥐', '고슴도치', '돌고래', '사슴', '너구리', '판다', '앵무새'];
+const COOLDOWN_MS = 3000;
+const MAX_GAP = 2; // 반 전체 찬반 인원 차이 허용치
+const STAGE_VIEW = { join: 'setup', debate: 'debate', end: 'end' };
+
+const $ = s => document.querySelector(s);
+const root = $('#app');
+const params = new URLSearchParams(location.search);
+const DEMO = params.has('demo') || !FIREBASE_CONFIG.apiKey;
+const ROOM = (params.get('room') || '').replace(/\D/g, '').slice(0, 4);
+const TEACHER = params.has('teacher');
+const S = { loaded: {}, key: '', refresh: null, showReal: false, qrOpen: false, size: 4, lastSent: 0, realErr: false, view: null, built: '' };
+let store;
+
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const vals = o => (o && typeof o === 'object') ? Object.entries(o).filter(([, v]) => v != null) : [];
+const list = o => Array.isArray(o) ? o.filter(v => v != null) : Object.values(o || {});
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const shuffle = a => { a = [...a]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const stanceOf = p => (p && STANCE[p.stance]) ? p.stance : '';
+const stage = () => S.state?.stage || 'join';
+// 나를 뺀 인원 기준으로, s를 고르면 차이가 MAX_GAP을 넘는지 (이미 s인 학생은 막지 않음)
+const othersWith = s => Object.entries(S.players || {}).filter(([u, p]) => u !== store.uid && stanceOf(p) === s).length;
+const sideFull = s => S.players?.[store.uid]?.stance !== s && othersWith(s) + 1 - othersWith(s === 'pro' ? 'con' : 'pro') > MAX_GAP;
+
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => t.hidden = true, 3500); }
+const write = (p, v) => Promise.resolve().then(() => store.set(`rooms/${ROOM}/${p}`, v)).then(() => true)
+  .catch(() => { toast('저장하지 못했어요. 연결을 확인하고 다시 해 주세요.'); return false; });
+const append = (p, v) => Promise.resolve().then(() => store.push(`rooms/${ROOM}/${p}`, v)).then(() => true)
+  .catch(() => { toast('보내지 못했어요. 토론 시간이 아니거나 연결이 끊겼을 수 있어요.'); return false; });
+
+/* ---------- 주제 다듬기 ---------- */
+function polishMotion(s) {
+  s = String(s || '').replace(/\s+/g, ' ').trim().replace(/[?？]+$/, '');
+  return s && !/[.!。]$/.test(s) ? s + '.' : s;
+}
+const topic = () => ({ motion: S.config?.topic?.motion || PRESETS[0].motion, background: S.config?.topic?.background ?? PRESETS[0].background });
+function motionHTML(open) {
+  const t = topic();
+  const bg = String(t.background || '').split('\n').map(p => p.trim()).filter(Boolean);
+  return `<details class="motion" ${open ? 'open' : ''}><summary>토론 주제: ${esc(t.motion)}</summary>
+    ${bg.length ? bg.map(p => `<p>${esc(p)}</p>`).join('') : '<p>찬성과 반대 중 하나를 골라, 근거를 들어 토론해요.</p>'}
+    <ul>${RULES.map(r => `<li>${esc(r)}</li>`).join('')}</ul></details>`;
+}
+
+/* ---------- 금칙어 ---------- */
+// 띄어쓰기, 숫자, 기호를 끼워 넣어 피해 가는 경우까지 잡음
+const SEP = /[\s\d.,!?~\-_*'"`^·:;()[\]{}<>/\\|+=@#$%&]/g;
+const norm = s => String(s).toLowerCase().replace(SEP, '');
+const banned = () => list(S.config?.banned).map(w => String(w).trim()).filter(Boolean);
+function findBanned(text) { const t = norm(text); return banned().find(w => norm(w) && t.includes(norm(w))) || null; }
+function maskBanned(text) {
+  let out = String(text);
+  for (const w of banned()) {
+    const chars = [...norm(w)];
+    if (!chars.length) continue;
+    const re = new RegExp(chars.map(c => c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('[\\s\\d.,!?~\\-_*\'"`^·:;()\\[\\]{}<>/\\\\|+=@#$%&]*'), 'gi');
+    out = out.replace(re, m => '＊'.repeat([...m].length));
+  }
+  return out;
+}
+
+/* ---------- 제한시간 ---------- */
+const now = () => Date.now() + (store?.offset || 0);
+const endsAt = () => S.state?.timer?.endsAt || 0;
+const timeUp = () => !!endsAt() && now() >= endsAt();
+function tick() {
+  const end = endsAt(), left = Math.max(0, end - now());
+  document.querySelectorAll('[data-timer]').forEach(el => {
+    el.hidden = !end && el.dataset.timer !== 'always';
+    el.textContent = !end ? '꺼짐' : left ? `${String(Math.floor(left / 60000)).padStart(2, '0')}:${String(Math.floor(left / 1000) % 60).padStart(2, '0')}` : '시간 종료';
+    el.classList.toggle('over', !!end && !left);
+    el.classList.toggle('soon', !!end && left > 0 && left <= 30000);
+  });
+  const btn = $('#send button'), box = $('#msg');
+  if (btn) { btn.disabled = timeUp(); box.placeholder = timeUp() ? '제한시간이 끝났어요.' : '근거를 들어 의견을 써 주세요 (200자까지)'; }
+}
+setInterval(tick, 500);
+
+/* ---------- 방 배정: 찬반이 섞이도록 ---------- */
+function assignRooms(players, size) {
+  const ids = Object.keys(players);
+  const n = Math.max(1, Math.round(ids.length / size));
+  const of = s => shuffle(ids.filter(u => stanceOf(players[u]) === s));
+  const rooms = Array.from({ length: n }, () => []);
+  of('pro').forEach((u, i) => rooms[i % n].push(u));
+  of('con').forEach((u, i) => rooms[n - 1 - (i % n)].push(u)); // 반대는 거꾸로 돌려 인원 균형을 맞춤
+  of('').forEach(u => rooms.reduce((a, b) => b.length < a.length ? b : a).push(u));
+  const out = {};
+  rooms.forEach((r, i) => r.forEach(u => out[u] = String(i + 1)));
+  return out;
+}
+// 이미 배정된 방은 그대로 두고, 같은 입장이 가장 적은 방부터 채움
+function placeLate(players, assign) {
+  const out = { ...assign };
+  const nums = [...new Set(Object.values(out))];
+  if (!nums.length) return null;
+  for (const u of shuffle(Object.keys(players).filter(u => !out[u]))) {
+    const s = stanceOf(players[u]);
+    const score = r => { const m = Object.keys(out).filter(x => out[x] === r); return [m.filter(x => stanceOf(players[x]) === s).length, m.length]; };
+    out[u] = [...nums].sort((a, b) => { const A = score(a), B = score(b); return A[0] - B[0] || A[1] - B[1]; })[0];
+  }
+  return out;
+}
+
+/* ---------- 저장소: Firebase 또는 체험 모드 ---------- */
+function loadScript(src) { return new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = () => no(new Error(src)); document.head.append(s); }); }
+
+async function firebaseStore() {
+  const base = 'https://www.gstatic.com/firebasejs/10.12.2/';
+  for (const f of ['firebase-app-compat.js', 'firebase-auth-compat.js', 'firebase-database-compat.js']) await loadScript(base + f);
+  firebase.initializeApp(FIREBASE_CONFIG);
+  const cred = await firebase.auth().signInAnonymously();
+  const db = firebase.database();
+  const st = {
+    uid: cred.user.uid, offset: 0,
+    on: (p, cb, err) => db.ref(p).on('value', s => cb(s.val()), e => err && err(e)),
+    set: (p, v) => db.ref(p).set(v),
+    push: (p, v) => db.ref(p).push(v),
+    onConnection: cb => db.ref('.info/connected').on('value', s => cb(!!s.val()))
+  };
+  // 기기마다 시계가 달라도 타이머가 같게 보이도록 서버 시간 기준으로 맞춤
+  db.ref('.info/serverTimeOffset').on('value', s => st.offset = s.val() || 0);
+  return st;
+}
+
+// shortcut: 체험 모드는 같은 브라우저의 탭끼리만 공유됨, 실제 수업은 Firebase 설정 필요
+function demoStore() {
+  const KEY = 'keyboard-debate-demo', ch = 'BroadcastChannel' in window ? new BroadcastChannel(KEY) : null;
+  let uid = null;
+  try { uid = sessionStorage.getItem(KEY + '-uid'); } catch {}
+  if (!uid) { uid = 'u' + Math.random().toString(36).slice(2, 10); try { sessionStorage.setItem(KEY + '-uid', uid); } catch {} }
+  const read = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } };
+  const get = (o, p) => p.split('/').reduce((x, k) => (x == null || x[k] === undefined) ? null : x[k], o);
+  const subs = [];
+  const fire = () => { const d = read(); subs.forEach(s => { const j = JSON.stringify(get(d, s.p)); if (j !== s.last) { s.last = j; s.cb(JSON.parse(j)); } }); };
+  if (ch) ch.onmessage = fire;
+  addEventListener('storage', fire);
+  const set = (p, v) => {
+    const d = read(), ks = p.split('/');
+    let o = d;
+    ks.slice(0, -1).forEach(k => { o = o[k] = (o[k] && typeof o[k] === 'object') ? o[k] : {}; });
+    if (v == null) delete o[ks.at(-1)]; else o[ks.at(-1)] = v;
+    try { localStorage.setItem(KEY, JSON.stringify(d)); } catch { return Promise.reject(new Error('storage')); }
+    ch && ch.postMessage(1); fire();
+    return Promise.resolve();
+  };
+  return {
+    uid, offset: 0,
+    on: (p, cb) => { subs.push({ p, cb, last: undefined }); setTimeout(fire); },
+    set,
+    push: (p, v) => set(`${p}/${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`, v),
+    onConnection: cb => cb(true)
+  };
+}
+
+/* ---------- 시작 ---------- */
+(async function boot() {
+  try { store = DEMO ? demoStore() : await firebaseStore(); }
+  catch (e) {
+    show(errorView('Firebase에 연결하지 못했어요', 'index.html 맨 위의 FIREBASE_CONFIG 값과, Firebase 콘솔에서 익명 로그인을 켰는지 확인해 주세요.'));
+    return;
+  }
+  $('#demo').hidden = !DEMO;
+  let offT;
+  store.onConnection(ok => { clearTimeout(offT); if (ok) $('#offline').hidden = true; else offT = setTimeout(() => $('#offline').hidden = false, 2500); });
+  if (!ROOM) return renderLanding();
+  const base = `rooms/${ROOM}`;
+  for (const k of ['owner', 'state', 'config', 'players', 'assign', 'chats']) store.on(`${base}/${k}`, v => { S[k] = v; S.loaded[k] = true; render(); });
+  if (TEACHER) store.on(`${base}/real`, v => { S.real = v; S.realErr = false; render(); }, () => { S.realErr = true; render(); });
+})();
+
+function show(html) { root.innerHTML = html; }
+function errorView(title, msg) {
+  return `<section class="landing"><h1 class="display">${esc(title)}</h1><p class="lead">${esc(msg)}</p><p><a class="btn" href="?${params.has('demo') ? 'demo' : ''}">첫 화면으로</a></p></section>`;
+}
+function go(q) { location.search = '?' + q + (params.has('demo') ? '&demo' : ''); }
+function joinURL() { return location.href.split('?')[0] + '?room=' + ROOM + (params.has('demo') ? '&demo' : ''); }
+
+let renderT;
+function render() { clearTimeout(renderT); renderT = setTimeout(() => { TEACHER ? renderTeacher() : renderStudent(); tick(); }, 16); }
+
+function renderLanding() {
+  show(`<section class="landing">
+    <p class="eyebrow">통합과학2 · Ⅲ-2-2 과학 관련 사회적 쟁점과 과학 윤리</p>
+    <h1 class="display">과학 윤리 키보드 토론</h1>
+    <p class="lead">가명으로 방에 들어가 과학 관련 사회적 쟁점을 두고 글로 토론해요.</p>
+    <div class="landing-grid">
+      <form id="join" class="box"><h2>학생 입장</h2>
+        <label for="code">입장 코드 4자리</label>
+        <input id="code" inputmode="numeric" maxlength="4" autocomplete="off" required pattern="[0-9]{4}">
+        <button class="btn primary">입장</button></form>
+      <div class="box"><h2>선생님</h2><p class="status">토론방을 새로 열면 입장 코드와 QR이 만들어져요.</p>
+        <button id="create" class="btn">새 토론 열기</button></div>
+    </div></section>`);
+  $('#join').onsubmit = e => { e.preventDefault(); go('room=' + $('#code').value); };
+  $('#create').onclick = createRoom;
+}
+
+async function createRoom() {
+  for (let i = 0; i < 10; i++) {
+    const code = String(Math.floor(1000 + Math.random() * 9000));
+    try {
+      // 이미 쓰이는 코드면 보안 규칙이 거절하므로 다른 코드로 다시 시도
+      await store.set(`rooms/${code}/owner`, store.uid);
+      await store.set(`rooms/${code}/config`, { topic: { motion: PRESETS[0].motion, background: PRESETS[0].background }, banned: DEFAULT_BANNED });
+      await store.set(`rooms/${code}/state`, { stage: 'join' });
+      return go(`teacher&room=${code}`);
+    } catch {}
+  }
+  toast('토론방을 열지 못했어요. Firebase 설정과 보안 규칙을 확인해 주세요.');
+}
+
+/* ---------- 공통 조각 ---------- */
+function messages(n) { return vals(S.chats?.[n]).map(([id, m]) => ({ id, ...m })).sort((a, b) => (a.t || 0) - (b.t || 0)); }
+function membersOf(n) { return Object.keys(S.assign || {}).filter(u => S.assign[u] === n); }
+function roomNums() { return [...new Set(Object.values(S.assign || {}))].sort((a, b) => a - b); }
+function badge(p) { const s = stanceOf(p); return `<span class="badge ${s}">${s ? STANCE[s] : '미선택'}</span>`; }
+const cut = (s, k) => s.length > k ? s.slice(0, k) + '…' : s;
+// 인용은 원래 메시지 id만 저장하고 그때그때 찾아 보여 줌: 선생님이 지운 메시지가 인용으로 남지 않게
+function quoteHTML(n, id) {
+  const o = S.chats?.[n]?.[id];
+  if (!o) return '<div class="quote">삭제된 메시지예요.</div>';
+  return `<div class="quote"><b>${esc(S.players?.[o.uid]?.alias || '알 수 없음')}</b> ${esc(cut(maskBanned(o.text), 60))}</div>`;
+}
+function msgHTML(m, n) {
+  const p = S.players?.[m.uid] || {};
+  const real = TEACHER && S.showReal ? `<span class="real">${esc(S.real?.[m.uid] || '')}</span>` : '';
+  const del = TEACHER ? `<button class="del" data-act="del" data-room="${esc(n)}" data-mid="${esc(m.id)}" aria-label="이 메시지 삭제">삭제</button>` : '';
+  const rep = !TEACHER && stage() === 'debate' && m.uid !== store.uid ? `<button class="rep" data-act="reply" data-mid="${esc(m.id)}" aria-label="이 메시지에 답장">답장</button>` : '';
+  return `<div class="msg ${stanceOf(p)} ${m.uid === store.uid ? 'mine' : ''}"><div class="who">${badge(p)}${esc(p.alias || '알 수 없음')} ${real}${del}${rep}</div>${m.re ? quoteHTML(n, m.re) : ''}<p>${esc(maskBanned(m.text))}</p></div>`;
+}
+function keepScroll(el, fn) {
+  const prev = {};
+  el.querySelectorAll('[data-scroll]').forEach(b => prev[b.dataset.scroll] = { top: b.scrollTop, end: b.scrollHeight - b.scrollTop - b.clientHeight < 40 });
+  fn();
+  el.querySelectorAll('[data-scroll]').forEach(b => { const p = prev[b.dataset.scroll]; b.scrollTop = !p || p.end ? b.scrollHeight : p.top; });
+}
+
+/* ---------- 공지 팝업 (학생) ---------- */
+function seenNotice() { try { return sessionStorage.getItem('seen-notice-' + ROOM); } catch { return null; } }
+function checkNotice() {
+  const n = S.state?.notice;
+  if (!n?.id || String(n.id) === seenNotice() || !S.players?.[store.uid]) return;
+  try { sessionStorage.setItem('seen-notice-' + ROOM, String(n.id)); } catch {}
+  $('#modal-text').textContent = n.text;
+  $('#modal').hidden = false;
+  $('#modal-ok').focus();
+}
+const closeModal = () => { $('#modal').hidden = true; $('#msg')?.focus(); };
+$('#modal-ok').onclick = closeModal;
+addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#modal').hidden) closeModal(); });
+
+/* ---------- 학생 ---------- */
+function renderStudent() {
+  if (!S.loaded.owner) return;
+  if (!S.owner) return show(errorView('토론방을 찾을 수 없어요', '입장 코드를 다시 확인해 주세요.'));
+  const me = S.players?.[store.uid];
+  const n = S.assign?.[store.uid] || '';
+  const key = [!!me, stage(), n].join('|');
+  if (key !== S.key) { S.key = key; S.refresh = null; studentLayout(me, stage(), n); }
+  S.refresh?.();
+  checkNotice();
+}
+
+function studentLayout(me, st, n) {
+  if (!me) {
+    show(`<div class="student"><section class="box">
+      <p class="eyebrow">입장 코드 ${esc(ROOM)}</p><h1 class="display">토론 참가 등록</h1>
+      <form id="reg" style="display:grid;gap:10px">
+        <label for="sid">학번 (숫자 5자리)</label>
+        <input id="sid" inputmode="numeric" maxlength="5" pattern="[0-9]{5}" required autocomplete="off" placeholder="예: 30301">
+        <label for="nm">이름</label>
+        <input id="nm" maxlength="10" required autocomplete="off" placeholder="예: 김민수">
+        <p class="status">학번과 이름은 선생님만 볼 수 있어요. 친구들에게는 자동으로 정해지는 가명만 보여요.</p>
+        <button class="btn primary">등록</button></form></section></div>`);
+    $('#sid').oninput = e => e.target.value = e.target.value.replace(/\D/g, '').slice(0, 5);
+    $('#reg').onsubmit = async e => {
+      e.preventDefault();
+      const sid = $('#sid').value.trim(), name = $('#nm').value.replace(/\s+/g, ' ').trim();
+      if (!/^\d{5}$/.test(sid)) return toast('학번은 30301처럼 숫자 5자리로 입력해 주세요.');
+      if (!name) return toast('이름을 입력해 주세요.');
+      e.submitter && (e.submitter.disabled = true);
+      const alias = `${pick(ADJ)} ${pick(NOUN)} ${Math.floor(10 + Math.random() * 90)}`;
+      if (await write(`real/${store.uid}`, `${sid} ${name}`)) await write(`players/${store.uid}`, { alias, stance: '', t: Date.now() });
+      e.submitter && (e.submitter.disabled = false);
+    };
+    return;
+  }
+  if (st === 'end' && !n) {
+    show(`<div class="student"><section class="box"><p class="eyebrow">나의 가명</p><p class="alias">${esc(me.alias)}</p>
+      <div id="topic"></div><div id="final"></div></section></div>`);
+    S.refresh = () => { $('#topic').innerHTML = motionHTML(false); drawFinal($('#final')); };
+    return;
+  }
+  if (st === 'join' || !n) {
+    show(`<div class="student"><section class="box">
+      <p class="eyebrow">나의 가명</p><p class="alias">${esc(me.alias)}</p>
+      <div id="topic"></div>
+      <div><p style="margin:0 0 8px;font-weight:700">이 주제에 대한 나의 입장</p>
+        <div class="stance-pick" id="pick"></div></div>
+      <p class="status" id="st"></p></section></div>`);
+    S.refresh = () => {
+      const p = S.players?.[store.uid] || {}, locked = stage() !== 'join', room = S.assign?.[store.uid];
+      $('#topic').innerHTML = motionHTML(true);
+      $('#pick').innerHTML = [['pro', '이 주장에 동의해요'], ['con', '이 주장에 동의하지 않아요']].map(([s, d]) => {
+        const full = !locked && sideFull(s), n = othersWith(s) + (p.stance === s ? 1 : 0);
+        return `<button class="${s}" data-act="stance" data-s="${s}" aria-pressed="${p.stance === s}" ${locked || full ? 'disabled' : ''}><b>${STANCE[s]}</b><span>${full ? '인원이 많아 지금은 고를 수 없어요' : d}</span><span>지금 ${n}명</span></button>`;
+      }).join('');
+      $('#st').textContent = room ? `${room}번 방에 배정됐어요. 토론이 시작되면 방이 열려요.`
+        : locked ? '선생님이 방을 배정하는 중이에요. 잠시 기다려 주세요.'
+        : p.stance ? '입장을 골랐어요. 토론이 시작되기 전까지 바꿀 수 있어요.' : '찬성과 반대 중 하나를 골라 주세요.';
+    };
+    return;
+  }
+  // 토론 중이거나 끝난 방
+  show(`<div class="student"><section class="chat">
+    <header class="room-head"><h1>${esc(n)}번 방</h1><span class="timer" data-timer hidden></span><span>${badge(me)}${esc(me.alias)}</span></header>
+    <div class="members" id="mem"></div>
+    <div id="topic"></div>
+    <p class="notice" id="notice" hidden></p>
+    <div class="msgs" id="msgs" data-scroll="me" aria-live="polite"></div>
+    <div class="reply-bar" id="replyBar" hidden></div>
+    ${st === 'debate' ? `<form id="send" class="send"><label class="sr" for="msg">메시지</label>
+      <textarea id="msg" maxlength="200" rows="2" placeholder="근거를 들어 의견을 써 주세요 (200자까지)"></textarea>
+      <button class="btn primary">보내기</button></form>` : '<div id="final"></div>'}
+  </section></div>`);
+  S.reply = null;
+  S.drawReply = () => {
+    const o = S.reply && S.chats?.[n]?.[S.reply];
+    if (!o) S.reply = null;
+    $('#replyBar').hidden = !o || stage() !== 'debate';
+    if (o) $('#replyBar').innerHTML = `<span><b>${esc(S.players?.[o.uid]?.alias || '알 수 없음')}</b>에게 답장 · ${esc(cut(maskBanned(o.text), 40))}</span><button type="button" class="btn" data-act="unreply">취소</button>`;
+  };
+  S.refresh = () => {
+    S.drawReply();
+    if ($('#final')) drawFinal($('#final'));
+    $('#mem').innerHTML = membersOf(n).map(u => `<span>${badge(S.players?.[u])}${esc(S.players?.[u]?.alias || '')}</span>`).join('');
+    const t = topic().motion;
+    if ($('#topic').dataset.m !== t) { $('#topic').dataset.m = t; $('#topic').innerHTML = motionHTML(false); }
+    const note = S.state?.notice?.text || '';
+    $('#notice').hidden = !note; $('#notice').textContent = note;
+    const ms = messages(n);
+    keepScroll(root, () => $('#msgs').innerHTML = ms.length ? ms.map(m => msgHTML(m, n)).join('') : '<p class="empty">첫 의견을 남겨 보세요.</p>');
+  };
+  const form = $('#send');
+  if (!form) return;
+  const box = $('#msg');
+  box.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); form.requestSubmit(); } });
+  form.onsubmit = async e => {
+    e.preventDefault();
+    const text = box.value.trim();
+    if (!text) return;
+    if (timeUp()) return toast('제한시간이 끝났어요.');
+    const bad = findBanned(text);
+    if (bad) return toast(`쓸 수 없는 표현("${bad}")이 들어 있어요. 표현을 바꿔 주세요.`);
+    const wait = S.lastSent + COOLDOWN_MS - Date.now();
+    if (wait > 0) return toast(`${Math.ceil(wait / 1000)}초 뒤에 다시 보낼 수 있어요.`);
+    S.lastSent = Date.now();
+    const msg = { uid: store.uid, text, t: Date.now() };
+    if (S.reply && S.chats?.[n]?.[S.reply]) msg.re = S.reply;
+    if (await append(`chats/${n}`, msg)) { box.value = ''; S.reply = null; S.drawReply(); }
+  };
+}
+
+// 토론이 끝난 뒤 최종 입장: 처음 입장(stance)과 따로 final에 저장
+function drawFinal(el) {
+  const p = S.players?.[store.uid] || {}, f0 = stanceOf(p), fin = STANCE[p.final] ? p.final : '';
+  el.innerHTML = `<div class="final"><p class="final-q">토론을 마친 지금, 나의 입장은?</p>
+    <p class="status">처음 입장: ${f0 ? STANCE[f0] : '고르지 않음'} · 대화는 위에서 다시 읽을 수 있어요.</p>
+    <div class="stance-pick">${['pro', 'con'].map(s => `<button class="${s}" data-act="final" data-s="${s}" aria-pressed="${fin === s}"><b>${STANCE[s]}</b></button>`).join('')}</div>
+    <p class="status">${!fin ? '하나를 골라 주세요.' : f0 && f0 !== fin ? '처음과 다른 입장으로 바꿨어요. 다시 고를 수 있어요.' : '제출했어요. 다시 고를 수 있어요.'}</p></div>`;
+}
+
+/* ---------- 교사 ---------- */
+function stanceStats(players) {
+  const r = { total: 0, answered: 0, keep: 0, p2c: 0, c2p: 0, none2: 0, first: { pro: 0, con: 0 }, final: { pro: 0, con: 0 } };
+  for (const p of Object.values(players || {})) {
+    const f0 = stanceOf(p), fin = STANCE[p?.final] ? p.final : '';
+    r.total++;
+    if (f0) r.first[f0]++;
+    if (!fin) continue;
+    r.answered++; r.final[fin]++;
+    if (!f0) r.none2++; else if (f0 === fin) r.keep++; else if (f0 === 'pro') r.p2c++; else r.c2p++;
+  }
+  return r;
+}
+function statsHTML() {
+  const r = stanceStats(S.players);
+  if (!r.answered) return `<h2>최종 입장 통계</h2><p class="empty">${stage() === 'end' ? '학생들이 최종 입장을 고르는 중이에요.' : '토론을 종료하면 학생들이 입장을 다시 고르고, 결과가 여기에 나와요.'}</p>`;
+  const changed = r.p2c + r.c2p, base = r.keep + changed, pct = n => base ? Math.round(n / base * 100) : 0;
+  const bar = (label, o) => { const t = o.pro + o.con || 1; return `<div class="sbar"><span>${label}</span><div class="bar2" role="img" aria-label="${label} 찬성 ${o.pro}명, 반대 ${o.con}명">
+    <span class="pro" style="width:${o.pro / t * 100}%">${o.pro ? '찬성 ' + o.pro : ''}</span><span class="con" style="width:${o.con / t * 100}%">${o.con ? '반대 ' + o.con : ''}</span></div></div>`; };
+  const moved = Object.entries(S.players || {}).filter(([, p]) => stanceOf(p) && STANCE[p.final] && p.final !== p.stance);
+  return `<h2>최종 입장 통계 <span class="status">응답 ${r.answered} / ${r.total}명</span></h2>
+    <div class="stat-tiles">
+      <div><b>${r.keep}명</b><span>입장 유지 ${pct(r.keep)}%</span></div>
+      <div><b>${changed}명</b><span>입장 바꿈 ${pct(changed)}%</span></div>
+      <div><b>${r.p2c}명</b><span>찬성 → 반대</span></div>
+      <div><b>${r.c2p}명</b><span>반대 → 찬성</span></div>
+      ${r.none2 ? `<div><b>${r.none2}명</b><span>처음 미선택 → 선택</span></div>` : ''}</div>
+    ${bar('처음', r.first)}${bar('최종', r.final)}
+    ${moved.length ? `<h3 style="font-size:1rem">입장을 바꾼 학생</h3><ul class="mlist">${moved.map(([u, p]) =>
+      `<li>${badge({ stance: p.stance })}→ ${badge({ stance: p.final })}${esc(p.alias)}${S.showReal ? `<span class="real">${esc(S.real?.[u] || '')}</span>` : ''}</li>`).join('')}</ul>` : ''}
+    <p class="status">비율은 처음 입장을 골랐고 최종 입장도 고른 학생 ${base}명 기준이에요.</p>`;
+}
+
+function renderTeacher() {
+  if (!S.loaded.owner || !S.loaded.config) return;
+  if (!S.owner) return show(errorView('토론방을 찾을 수 없어요', '입장 코드를 확인하거나 첫 화면에서 새 토론을 열어 주세요.'));
+  if (!$('#t-main')) teacherShell();
+  S.view ||= STAGE_VIEW[stage()];
+  const live = STAGE_VIEW[stage()];
+  document.querySelectorAll('[data-act="view"]').forEach(b => {
+    b.setAttribute('aria-selected', b.dataset.v === S.view);
+    b.querySelector('.live').hidden = b.dataset.v !== live;
+  });
+  $('#qrbox').hidden = !S.qrOpen;
+  $('#qrbtn').classList.toggle('on', S.qrOpen);
+  const P = S.players || {}, ids = Object.keys(P);
+  const c = s => ids.filter(u => stanceOf(P[u]) === s).length;
+  $('#t-status').innerHTML = `<div class="counts">
+      ${realBtn()}<span class="pill">참가 ${ids.length}명</span><span class="pill">${badge({ stance: 'pro' })}${c('pro')}명</span>
+      <span class="pill">${badge({ stance: 'con' })}${c('con')}명</span><span class="pill">미선택 ${c('')}명</span>
+      <span class="pill">방 ${roomNums().length}개</span></div>
+    ${S.realErr ? '<p class="banner bad">이 기기에서는 본명을 볼 수 없어요. 토론방을 만든 기기와 브라우저에서 열어 주세요.</p>' : ''}`;
+  if (S.built !== S.view) { S.built = S.view; $('#t-main').innerHTML = VIEWS[S.view].build(); VIEWS[S.view].bind?.(); }
+  keepScroll($('#t-main'), VIEWS[S.view].update);
+}
+
+function teacherShell() {
+  show(`<div class="teacher">
+    <header class="t-head">
+      <div class="t-brand"><span class="display">과학 윤리 키보드 토론</span>
+        <span class="pill">입장 코드 <b>${esc(ROOM)}</b></span>
+        <button class="btn" id="qrbtn" data-act="qr">입장 QR</button></div>
+    </header>
+    <section class="box qrbox" id="qrbox" hidden>${qrImg()}
+      <div><p class="eyebrow">입장 코드</p><p class="code">${esc(ROOM)}</p><p class="url">${esc(joinURL())}</p></div></section>
+    <nav class="tabs" role="tablist" aria-label="화면 이동">
+      <button role="tab" data-act="view" data-v="setup">1 입장 선택·방 배정 <span class="live idle" hidden>지금 단계</span></button>
+      <button role="tab" data-act="view" data-v="debate">2 토론 <span class="live" hidden>진행 중</span></button>
+      <button role="tab" data-act="view" data-v="end">3 종료 <span class="live idle" hidden>종료됨</span></button>
+    </nav>
+    <div id="t-status"></div>
+    <main id="t-main"></main></div>`);
+}
+
+let qrCache;
+function qrImg() {
+  if (qrCache === undefined) {
+    qrCache = '';
+    try { const d = document.createElement('div'); new QRCode(d, { text: joinURL(), width: 440, height: 440, correctLevel: QRCode.CorrectLevel.M }); qrCache = d.querySelector('canvas')?.toDataURL() || ''; } catch {}
+  }
+  return qrCache ? `<img src="${qrCache}" alt="입장 QR 코드">` : '<p class="empty">QR을 만들지 못했어요. 주소를 칠판에 적어 주세요.</p>';
+}
+
+const realBtn = () => `<button class="btn ${S.showReal ? 'on' : ''}" data-act="real" aria-pressed="${S.showReal}">${S.showReal ? '본명 숨기기' : '본명 보기'}</button>`;
+function realOf(u) {
+  if (S.realErr) return '<span class="masked">볼 수 없음</span>';
+  return S.showReal ? esc(S.real?.[u] || '(없음)') : '<span class="masked">●●●</span>';
+}
+function memberList(n) {
+  const P = S.players || {};
+  return `<ul class="mlist">${membersOf(n).map(u => `<li>${badge(P[u])}${esc(P[u]?.alias || '')}${S.showReal ? `<span class="real">${esc(S.real?.[u] || '')}</span>` : ''}</li>`).join('')}</ul>`;
+}
+function roomCards(withChat) {
+  const nums = roomNums(), P = S.players || {};
+  if (!nums.length) return '<p class="empty">아직 방이 없어요. "1 입장 선택·방 배정" 탭에서 방을 배정해 주세요.</p>';
+  return `<div class="rooms">${nums.map(n => {
+    const mem = membersOf(n), ms = messages(n);
+    const cnt = s => mem.filter(u => stanceOf(P[u]) === s).length;
+    return `<article class="room"><h3>${esc(n)}번 방 <small>찬성 ${cnt('pro')} · 반대 ${cnt('con')}${withChat ? ` · 메시지 ${ms.length}` : ''}</small></h3>
+      ${memberList(n)}
+      ${withChat ? `<div class="msgs" data-scroll="r${esc(n)}">${ms.length ? ms.map(m => msgHTML(m, n)).join('') : '<p class="empty">아직 메시지가 없어요.</p>'}</div>` : ''}</article>`;
+  }).join('')}</div>`;
+}
+function lateBanner() {
+  const P = S.players || {}, late = Object.keys(P).filter(u => !S.assign?.[u]);
+  if (!late.length || !roomNums().length) return '';
+  return `<p class="banner">배정되지 않은 학생 ${late.length}명: ${late.map(u => esc(P[u].alias)).join(', ')} <button class="btn" data-act="late">지금 배정</button></p>`;
+}
+
+const VIEWS = {
+  setup: {
+    build: () => `<div class="grid2"><div class="col">
+      <section class="box"><h2>토론 주제</h2>
+        <label for="preset">교과서 주제 불러오기</label>
+        <select id="preset"><option value="">직접 입력</option>${PRESETS.map((p, i) => `<option value="${i}">${esc(p.name)}</option>`).join('')}</select>
+        <label for="motion">주제 문장</label>
+        <input id="motion" maxlength="80" value="${esc(topic().motion)}" placeholder="예: 동물 실험을 금지해야 한다">
+        <label for="bg">배경 설명 <span class="status">(학생 화면에 나와요. 비워 두면 기본 안내가 나와요)</span></label>
+        <textarea id="bg" rows="5" maxlength="600">${esc(topic().background)}</textarea>
+        <div class="row"><button class="btn primary" data-act="saveTopic">주제 저장</button><span class="status" id="topicSt"></span></div>
+      </section>
+      <section class="box"><h2>금칙어</h2>
+        <label for="banned">이 말이 들어간 메시지는 보낼 수 없어요</label>
+        <textarea id="banned" rows="5">${esc(banned().join(', '))}</textarea>
+        <p class="status">쉼표나 줄바꿈으로 구분해요. 띄어쓰기, 숫자, 기호를 섞어 써도 걸러지고, 이미 보낸 메시지에서는 ＊로 가려져요.</p>
+        <div class="row"><button class="btn primary" data-act="saveBanned">금칙어 저장</button><button class="btn" data-act="defaultBanned">기본 목록으로</button><span class="status" id="bannedSt"></span></div>
+      </section></div>
+      <div class="col">
+        <section class="box"><div class="row"><h2>참가자</h2><span id="realBtn2"></span></div><div id="roster"></div></section>
+        <section class="box"><h2>방 배정</h2>
+          <div class="row"><label for="size">방 인원</label>
+            <select id="size">${[2, 3, 4, 5, 6].map(k => `<option value="${k}" ${k === S.size ? 'selected' : ''}>${k}명 안팎</option>`).join('')}</select>
+            <span id="assignBtns" class="row"></span></div>
+          <p class="status">찬성과 반대가 각 방에 고르게 섞이도록 무작위로 나눠요. 미선택 학생은 인원이 적은 방에 들어가요.</p>
+          <div id="preview"></div></section>
+      </div></div>`,
+    bind: () => {
+      $('#size').onchange = e => S.size = +e.target.value;
+      $('#preset').onchange = e => { const p = PRESETS[e.target.value]; if (p) { $('#motion').value = p.motion; $('#bg').value = p.background; } };
+    },
+    update: () => {
+      // 학번 순 정렬 (본명을 못 읽는 기기에서는 들어온 순서)
+      const key = u => S.real?.[u] ? String(S.real[u]) : null;
+      // 학번 순, 본명 없는 학생은 맨 아래에 들어온 순서로
+      const rows = Object.entries(S.players || {}).sort(([u, a], [v, b]) => !key(u) - !key(v) || (key(u) || '').localeCompare(key(v) || '') || (a.t || 0) - (b.t || 0));
+      $('#realBtn2').innerHTML = realBtn();
+      $('#roster').innerHTML = rows.length ? `<div class="tablewrap"><table class="roster">
+        <colgroup><col style="width:30%"><col style="width:36%"><col style="width:17%"><col style="width:17%"></colgroup>
+        <thead><tr><th>학번·이름</th><th>가명</th><th>입장</th><th>방</th></tr></thead><tbody>
+        ${rows.map(([u, p]) => `<tr><td>${realOf(u)}</td><td>${esc(p.alias)}</td><td>${badge(p)}</td><td>${S.assign?.[u] ? esc(S.assign[u]) + '번' : '—'}</td></tr>`).join('')}
+        </tbody></table></div>` : '<p class="empty">아직 들어온 학생이 없어요. 위의 "입장 QR"을 띄워 주세요.</p>';
+      const has = roomNums().length > 0, open = stage() === 'join';
+      $('#assignBtns').innerHTML = `<button class="btn primary" data-act="shuffle" ${rows.length && open ? '' : 'disabled'}>${has ? '다시 랜덤 배정' : '랜덤 배정'}</button>
+        <button class="btn" data-act="late" ${has ? '' : 'disabled'}>새로 온 학생만 배정</button>`;
+      $('#preview').innerHTML = (open ? '' : '<p class="status">토론이 시작된 뒤에는 새로 온 학생만 배정할 수 있어요.</p>') + lateBanner() + (has ? roomCards(false) : '');
+    }
+  },
+  debate: {
+    build: () => `<section class="box">
+        <div class="row" id="startArea"></div>
+        <div class="row"><b>제한시간</b>
+          <label class="sr" for="mins">제한시간 분</label>
+          <select id="mins">${[1, 2, 3, 4, 5, 7, 10, 15, 20].map(m => `<option value="${m}" ${m === 3 ? 'selected' : ''}>${m}분</option>`).join('')}<option value="custom">기타</option></select>
+          <span id="customBox" class="row" hidden><label class="sr" for="minsCustom">제한시간 직접 입력(분)</label>
+            <input id="minsCustom" type="number" inputmode="numeric" min="1" max="90" value="30" style="width:5.5em">분</span>
+          <button class="btn" data-act="timerStart">시작</button><button class="btn" data-act="timerAdd">+1분</button><button class="btn" data-act="timerStop">끄기</button>
+          <span class="timer big" data-timer="always">꺼짐</span></div>
+        <div class="row phase"><b>단계 공지</b><span id="phaseBtns" class="row"></span></div>
+        <form id="nf" class="row"><label for="nt"><b>직접 공지</b></label>
+          <input id="nt" maxlength="80" placeholder="학생 화면에 팝업으로 떠요" style="flex:1 1 240px;width:auto">
+          <button class="btn">공지 띄우기</button><button type="button" class="btn" data-act="clearNotice">공지 내리기</button></form>
+        <p class="status" id="nowNotice"></p>
+      </section>
+      <div id="rooms"></div>`,
+    bind: () => {
+      $('#mins').onchange = e => { const c = e.target.value === 'custom'; $('#customBox').hidden = !c; if (c) $('#minsCustom').select(); };
+      $('#nf').onsubmit = e => { e.preventDefault(); const v = $('#nt').value.trim(); if (v) sendNotice(v, null).then(ok => ok && ($('#nt').value = '')); };
+    },
+    update: () => {
+      const st = stage();
+      $('#startArea').innerHTML = st === 'join'
+        ? `<button class="btn primary big" data-act="start" ${roomNums().length ? '' : 'disabled'}>토론 시작</button>
+           <span class="status">${roomNums().length ? '누르면 학생들의 방이 열리고 채팅을 시작할 수 있어요. 입장은 더 바꿀 수 없어요.' : '먼저 "1 입장 선택·방 배정" 탭에서 방을 배정해 주세요.'}</span>`
+        : st === 'debate' ? '<span class="live">토론 진행 중</span><span class="status">끝내려면 "3 종료" 탭에서 토론 종료를 눌러요.</span>'
+        : '<span class="live idle">토론 종료됨</span><span class="status">다시 열려면 "3 종료" 탭을 이용해요.</span>';
+      const ph = S.state?.notice?.phase;
+      $('#phaseBtns').innerHTML = PHASES.map((p, i) => `<button class="btn ${ph === i ? 'on' : ''}" data-act="phase" data-i="${i}" aria-pressed="${ph === i}">${p.label}</button>`).join('');
+      $('#nowNotice').textContent = S.state?.notice?.text ? `학생 화면에 띄운 공지: ${S.state.notice.text}` : '띄운 공지가 없어요.';
+      $('#rooms').innerHTML = lateBanner() + roomCards(true);
+    }
+  },
+  end: {
+    build: () => `<section class="box"><div class="row" id="endArea"></div></section><section class="box" id="stats"></section><div id="rooms"></div>`,
+    update: () => {
+      const st = stage(), total = roomNums().reduce((a, n) => a + messages(n).length, 0);
+      $('#endArea').innerHTML = st === 'debate'
+        ? `<button class="btn danger big" data-act="finish">토론 종료</button><span class="status">누르면 학생들은 메시지를 더 보낼 수 없고, 최종 입장을 다시 고르는 화면이 나와요.</span>`
+        : st === 'end' ? `<span class="live idle">토론 종료됨</span><span class="status">전체 메시지 ${total}개 · 학생들이 최종 입장을 고르고 있어요.</span><button class="btn" data-act="reopen">토론 다시 열기</button>`
+        : '<span class="status">아직 토론을 시작하지 않았어요. "2 토론" 탭에서 시작해 주세요.</span>';
+      $('#stats').innerHTML = statsHTML();
+      $('#rooms').innerHTML = roomCards(true);
+    }
+  }
+};
+
+const setState = patch => write('state', { stage: 'join', ...S.state, ...patch });
+const sendNotice = (text, phase) => setState({ notice: { text, phase, id: Date.now() } });
+
+/* ---------- 클릭 ---------- */
+const ACTS = {
+  view: b => { S.view = b.dataset.v; render(); },
+  qr: () => { S.qrOpen = !S.qrOpen; render(); },
+  real: () => { S.showReal = !S.showReal; render(); },
+  start: () => setState({ stage: 'debate' }),
+  finish: () => setState({ stage: 'end', timer: null }),
+  reopen: () => setState({ stage: 'debate' }),
+  phase: b => sendNotice(PHASES[+b.dataset.i].text, +b.dataset.i),
+  clearNotice: () => setState({ notice: null }),
+  timerStart: () => {
+    const m = $('#mins').value === 'custom' ? Math.round(+$('#minsCustom').value) : +$('#mins').value;
+    if (!(m >= 1 && m <= 90)) return toast('제한시간은 1분에서 90분 사이로 입력해 주세요.');
+    setState({ timer: { endsAt: now() + m * 60000 } });
+  },
+  timerAdd: () => endsAt() ? setState({ timer: { endsAt: Math.max(endsAt(), now()) + 60000 } }) : toast('먼저 타이머를 시작해 주세요.'),
+  timerStop: () => setState({ timer: null }),
+  saveTopic: () => {
+    const motion = polishMotion($('#motion').value);
+    if (!motion) return toast('주제 문장을 입력해 주세요.');
+    const background = $('#bg').value.split('\n').map(s => s.replace(/\s+/g, ' ').trim()).filter(Boolean).join('\n');
+    $('#motion').value = motion; $('#bg').value = background;
+    write('config/topic', { motion, background }).then(ok => ok && ($('#topicSt').textContent = '저장했어요. 학생 화면에 바로 반영돼요.'));
+  },
+  saveBanned: () => {
+    const words = [...new Set($('#banned').value.split(/[,\n]/).map(s => s.trim()).filter(Boolean))];
+    write('config/banned', words).then(ok => ok && ($('#bannedSt').textContent = `${words.length}개 저장했어요.`));
+  },
+  defaultBanned: () => { $('#banned').value = DEFAULT_BANNED.join(', '); $('#bannedSt').textContent = '저장을 눌러야 적용돼요.'; },
+  shuffle: () => write('assign', assignRooms(S.players || {}, S.size)),
+  late: () => { const out = placeLate(S.players || {}, S.assign || {}); write('assign', out || assignRooms(S.players || {}, S.size)); },
+  del: b => write(`chats/${b.dataset.room}/${b.dataset.mid}`, null),
+  reply: b => { S.reply = b.dataset.mid; S.drawReply?.(); $('#msg')?.focus(); },
+  unreply: () => { S.reply = null; S.drawReply?.(); $('#msg')?.focus(); },
+  final: b => { if (stage() === 'end') write(`players/${store.uid}/final`, b.dataset.s); },
+  stance: b => {
+    if (stage() !== 'join') return;
+    if (sideFull(b.dataset.s)) return toast(`${STANCE[b.dataset.s]} 인원이 이미 ${MAX_GAP}명 더 많아요. 인원을 맞추기 위해 다른 쪽을 골라 주세요.`);
+    write(`players/${store.uid}/stance`, b.dataset.s);
+  }
+};
+root.addEventListener('click', e => { const b = e.target.closest('[data-act]'); if (b && !b.disabled) ACTS[b.dataset.act]?.(b); });
+</script>
+</body>
+</html>

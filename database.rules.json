@@ -1,0 +1,46 @@
+{
+  "rules": {
+    "rooms": {
+      "$room": {
+        "owner": {
+          ".read": "auth != null",
+          ".write": "auth != null && !data.exists() && newData.val() === auth.uid"
+        },
+        "state": {
+          ".read": "auth != null",
+          ".write": "auth != null && root.child('rooms').child($room).child('owner').val() === auth.uid"
+        },
+        "config": {
+          ".read": "auth != null",
+          ".write": "auth != null && root.child('rooms').child($room).child('owner').val() === auth.uid"
+        },
+        "assign": {
+          ".read": "auth != null",
+          ".write": "auth != null && root.child('rooms').child($room).child('owner').val() === auth.uid"
+        },
+        "real": {
+          ".read": "auth != null && root.child('rooms').child($room).child('owner').val() === auth.uid",
+          "$uid": {
+            ".write": "auth != null && $uid === auth.uid",
+            ".validate": "newData.isString() && newData.val().length <= 20"
+          }
+        },
+        "players": {
+          ".read": "auth != null",
+          "$uid": {
+            ".write": "auth != null && $uid === auth.uid"
+          }
+        },
+        "chats": {
+          ".read": "auth != null",
+          "$n": {
+            "$mid": {
+              ".write": "auth != null && ((!data.exists() && newData.child('uid').val() === auth.uid && root.child('rooms').child($room).child('assign').child(auth.uid).val() === $n && root.child('rooms').child($room).child('state').child('stage').val() === 'debate') || (!newData.exists() && root.child('rooms').child($room).child('owner').val() === auth.uid))",
+              ".validate": "newData.child('text').isString() && newData.child('text').val().length <= 200 && newData.child('t').isNumber() && (!newData.child('re').exists() || (newData.child('re').isString() && newData.child('re').val().length <= 40))"
+            }
+          }
+        }
+      }
+    }
+  }
+}
