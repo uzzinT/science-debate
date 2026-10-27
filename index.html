@@ -62,6 +62,14 @@ label{font-weight:500}
 .box > h2,.box > .row:has(> h2){margin-bottom:4px}
 .box > label:not(:first-of-type),form > label:not(:first-of-type){margin-top:10px}
 .box > .row:not(:first-child){margin-top:4px}
+/* 접히는 칸 (금칙어): 프로젝터에 목록이 바로 보이지 않게 */
+.fold summary{display:flex;align-items:center;gap:10px;cursor:pointer;list-style:none}
+.fold summary::-webkit-details-marker{display:none}
+.fold:not([open]) > :not(summary){display:none}
+.fold summary .btn{margin-left:auto}
+.fold .when-open,.fold[open] .when-closed{display:none}
+.fold[open] .when-open{display:inline}
+.fold[open] summary{margin-bottom:4px}
 .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .row select{width:auto}
 .timer{font-family:var(--display);font-variant-numeric:tabular-nums;font-size:1.3rem;padding:.05em .6em;border-radius:10px;background:var(--civic-soft);color:var(--civic)}
@@ -724,12 +732,13 @@ const VIEWS = {
         <textarea id="bg" rows="5" maxlength="600">${esc(topic().background)}</textarea>
         <div class="row"><button class="btn primary" data-act="saveTopic">주제 저장</button><span class="status" id="topicSt"></span></div>
       </section>
-      <section class="box"><h2>금칙어</h2>
+      <details class="box fold"><summary><h2>금칙어</h2><span class="status" id="bannedCount">${banned().length}개 설정됨</span>
+          <span class="btn"><span class="when-closed">펼치기</span><span class="when-open">접기</span></span></summary>
         <label for="banned">이 말이 들어간 메시지는 보낼 수 없어요</label>
         <textarea id="banned" rows="5">${esc(banned().join(', '))}</textarea>
         <p class="status">쉼표나 줄바꿈으로 구분해요. 띄어쓰기, 숫자, 기호를 섞어 써도 걸러지고, 이미 보낸 메시지에서는 ＊로 가려져요.</p>
         <div class="row"><button class="btn primary" data-act="saveBanned">금칙어 저장</button><button class="btn" data-act="defaultBanned">기본 목록으로</button><span class="status" id="bannedSt"></span></div>
-      </section></div>
+      </details></div>
       <div class="col">
         <section class="box"><div class="row"><h2>참가자</h2><span id="realBtn2"></span></div><div id="roster"></div></section>
         <section class="box"><h2>방 배정</h2>
@@ -838,7 +847,7 @@ const ACTS = {
   },
   saveBanned: () => {
     const words = [...new Set($('#banned').value.split(/[,\n]/).map(s => s.trim()).filter(Boolean))];
-    write('config/banned', words).then(ok => ok && ($('#bannedSt').textContent = `${words.length}개 저장했어요.`));
+    write('config/banned', words).then(ok => { if (ok) { $('#bannedSt').textContent = `${words.length}개 저장했어요.`; $('#bannedCount').textContent = `${words.length}개 설정됨`; } });
   },
   defaultBanned: () => { $('#banned').value = DEFAULT_BANNED.join(', '); $('#bannedSt').textContent = '저장을 눌러야 적용돼요.'; },
   shuffle: () => write('assign', assignRooms(S.players || {}, S.size)),
