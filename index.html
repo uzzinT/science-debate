@@ -210,7 +210,7 @@ const $ = s => document.querySelector(s);
 const root = $('#app');
 const params = new URLSearchParams(location.search);
 const DEMO = params.has('demo') || !FIREBASE_CONFIG.apiKey;
-const ROOM = (params.get('room') || '').replace(/\D/g, '').slice(0, 4);
+const ROOM = (params.get('room') || '').replace(/\D/g, '').slice(0, 6);
 const TEACHER = params.has('teacher');
 const S = { loaded: {}, key: '', refresh: null, showReal: false, qrOpen: false, size: 4, lastSent: 0, realErr: false, view: null, built: '' };
 let store;
@@ -317,7 +317,7 @@ async function firebaseStore() {
   const db = firebase.database();
   const st = {
     uid: cred.user.uid, offset: 0,
-    on: (p, cb, err) => db.ref(p).on('value', s => cb(s.val()), e => err && err(e)),
+    on: (p, cb, err) => { const ref = db.ref(p), f = s => cb(s.val()); ref.on('value', f, e => err && err(e)); return () => ref.off('value', f); },
     set: (p, v) => db.ref(p).set(v),
     push: (p, v) => db.ref(p).push(v),
     onConnection: cb => db.ref('.info/connected').on('value', s => cb(!!s.val()))
@@ -350,7 +350,7 @@ function demoStore() {
   };
   return {
     uid, offset: 0,
-    on: (p, cb) => { subs.push({ p, cb, last: undefined }); setTimeout(fire); },
+    on: (p, cb) => { const s = { p, cb, last: undefined }; subs.push(s); setTimeout(fire); return () => subs.splice(subs.indexOf(s), 1); },
     set,
     push: (p, v) => set(`${p}/${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`, v),
     onConnection: cb => cb(true)
@@ -369,9 +369,20 @@ function demoStore() {
   store.onConnection(ok => { clearTimeout(offT); if (ok) $('#offline').hidden = true; else offT = setTimeout(() => $('#offline').hidden = false, 2500); });
   if (!ROOM) return renderLanding();
   const base = `rooms/${ROOM}`;
-  for (const k of ['owner', 'state', 'config', 'players', 'assign', 'chats']) store.on(`${base}/${k}`, v => { S[k] = v; S.loaded[k] = true; render(); });
+  // 학생은 자기 방 대화만 구독 (보안 규칙도 자기 방만 읽게 막음)
+  for (const k of ['owner', 'state', 'config', 'players', 'assign', ...(TEACHER ? ['chats'] : [])])
+    store.on(`${base}/${k}`, v => { S[k] = v; S.loaded[k] = true; if (k === 'assign' && !TEACHER) watchChat(); render(); });
   if (TEACHER) store.on(`${base}/real`, v => { S.real = v; S.realErr = false; render(); }, () => { S.realErr = true; render(); });
 })();
+
+// 방이 바뀌면 이전 방 구독을 끊고 새 방만 구독
+function watchChat() {
+  const n = S.assign?.[store.uid] || '';
+  if (n === S.chatRoom) return;
+  S.chatOff?.();
+  S.chatRoom = n; S.chats = {}; S.chatOff = null;
+  if (n) S.chatOff = store.on(`rooms/${ROOM}/chats/${n}`, v => { S.chats = { [n]: v }; render(); });
+}
 
 function show(html) { root.innerHTML = html; }
 function errorView(title, msg) {
@@ -390,8 +401,8 @@ function renderLanding() {
     <p class="lead">가명으로 방에 들어가 과학 관련 사회적 쟁점을 두고 글로 토론해요.</p>
     <div class="landing-grid">
       <form id="join" class="box"><h2>학생 입장</h2>
-        <label for="code">입장 코드 4자리</label>
-        <input id="code" inputmode="numeric" maxlength="4" autocomplete="off" required pattern="[0-9]{4}">
+        <label for="code">입장 코드 6자리</label>
+        <input id="code" inputmode="numeric" maxlength="6" autocomplete="off" required pattern="[0-9]{6}">
         <button class="btn primary">입장</button></form>
       <div class="box"><h2>선생님</h2><p class="status">토론방을 새로 열면 입장 코드와 QR이 만들어져요.</p>
         <button id="create" class="btn">새 토론 열기</button></div>
@@ -402,7 +413,7 @@ function renderLanding() {
 
 async function createRoom() {
   for (let i = 0; i < 10; i++) {
-    const code = String(Math.floor(1000 + Math.random() * 9000));
+    const code = String(Math.floor(100000 + Math.random() * 900000));
     try {
       // 이미 쓰이는 코드면 보안 규칙이 거절하므로 다른 코드로 다시 시도
       await store.set(`rooms/${code}/owner`, store.uid);
@@ -460,13 +471,19 @@ function renderStudent() {
   if (!S.owner) return show(errorView('토론방을 찾을 수 없어요', '입장 코드를 다시 확인해 주세요.'));
   const me = S.players?.[store.uid];
   const n = S.assign?.[store.uid] || '';
-  const key = [!!me, stage(), n].join('|');
+  const key = [!!me, stage(), n, !me && !!S.state?.closed].join('|');
   if (key !== S.key) { S.key = key; S.refresh = null; studentLayout(me, stage(), n); }
   S.refresh?.();
   checkNotice();
 }
 
 function studentLayout(me, st, n) {
+  if (!me && S.state?.closed) {
+    show(`<div class="student"><section class="box"><p class="eyebrow">입장 코드 ${esc(ROOM)}</p>
+      <h1 class="display">입장이 마감됐어요</h1>
+      <p class="status">이 토론방은 더 이상 새 참가자를 받지 않아요. 수업 중인 학생이라면 선생님께 입장을 다시 열어 달라고 말씀해 주세요. 열리면 이 화면이 자동으로 바뀌어요.</p></section></div>`);
+    return;
+  }
   if (!me) {
     show(`<div class="student"><section class="box">
       <p class="eyebrow">입장 코드 ${esc(ROOM)}</p><h1 class="display">토론 참가 등록</h1>
@@ -483,6 +500,7 @@ function studentLayout(me, st, n) {
       const sid = $('#sid').value.trim(), name = $('#nm').value.replace(/\s+/g, ' ').trim();
       if (!/^\d{5}$/.test(sid)) return toast('학번은 30301처럼 숫자 5자리로 입력해 주세요.');
       if (!name) return toast('이름을 입력해 주세요.');
+      if (S.state?.closed) return toast('입장이 마감됐어요. 선생님께 말씀해 주세요.');
       e.submitter && (e.submitter.disabled = true);
       const alias = `${pick(ADJ)} ${pick(NOUN)} ${Math.floor(10 + Math.random() * 90)}`;
       if (await write(`real/${store.uid}`, `${sid} ${name}`)) await write(`players/${store.uid}`, { alias, stance: '', t: Date.now() });
@@ -623,7 +641,8 @@ function renderTeacher() {
   const P = S.players || {}, ids = Object.keys(P);
   const c = s => ids.filter(u => stanceOf(P[u]) === s).length;
   $('#t-status').innerHTML = `<div class="counts">
-      ${realBtn()}<span class="pill">참가 ${ids.length}명</span><span class="pill">${badge({ stance: 'pro' })}${c('pro')}명</span>
+      ${realBtn()}<button class="btn ${S.state?.closed ? 'on' : ''}" data-act="close" aria-pressed="${!!S.state?.closed}">${S.state?.closed ? '입장 마감됨 · 다시 열기' : '입장 마감'}</button>
+      <span class="pill">참가 ${ids.length}명</span><span class="pill">${badge({ stance: 'pro' })}${c('pro')}명</span>
       <span class="pill">${badge({ stance: 'con' })}${c('con')}명</span><span class="pill">미선택 ${c('')}명</span>
       <span class="pill">방 ${roomNums().length}개</span></div>
     ${S.realErr ? '<p class="banner bad">이 기기에서는 본명을 볼 수 없어요. 토론방을 만든 기기와 브라우저에서 열어 주세요.</p>' : ''}`;
@@ -757,7 +776,7 @@ const VIEWS = {
       const st = stage();
       $('#startArea').innerHTML = st === 'join'
         ? `<button class="btn primary big" data-act="start" ${roomNums().length ? '' : 'disabled'}>토론 시작</button>
-           <span class="status">${roomNums().length ? '누르면 학생들의 방이 열리고 채팅을 시작할 수 있어요. 입장은 더 바꿀 수 없어요.' : '먼저 "1 입장 선택·방 배정" 탭에서 방을 배정해 주세요.'}</span>`
+           <span class="status">${roomNums().length ? `누르면 학생들의 방이 열리고 채팅을 시작할 수 있어요. 입장은 더 바꿀 수 없어요.${S.state?.closed ? '' : ' 시작 전에 위의 "입장 마감"을 누르면 외부인이 들어올 수 없어요.'}` : '먼저 "1 입장 선택·방 배정" 탭에서 방을 배정해 주세요.'}</span>`
         : st === 'debate' ? '<span class="live">토론 진행 중</span><span class="status">끝내려면 "3 종료" 탭에서 토론 종료를 눌러요.</span>'
         : '<span class="live idle">토론 종료됨</span><span class="status">다시 열려면 "3 종료" 탭을 이용해요.</span>';
       const ph = S.state?.notice?.phase;
@@ -788,6 +807,7 @@ const ACTS = {
   view: b => { S.view = b.dataset.v; render(); },
   qr: () => { S.qrOpen = !S.qrOpen; render(); },
   real: () => { S.showReal = !S.showReal; render(); },
+  close: () => setState({ closed: !S.state?.closed }),
   start: () => setState({ stage: 'debate' }),
   finish: () => setState({ stage: 'end', timer: null }),
   reopen: () => setState({ stage: 'debate' }),
